@@ -1,0 +1,72 @@
+name: SPFx CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '14.19.0'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build solution
+        run: gulp build --ship
+
+      - name: Bundle solution
+        run: gulp bundle --ship
+
+      - name: Package solution
+        run: gulp package-solution --ship
+
+      # Updated to v4 of upload-artifact
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: spfx-package
+          path: sharepoint/solution/*.sppkg
+          retention-days: 7  # Optional: specify how long to keep the artifact
+
+      - name: Install CLI for Microsoft 365
+        run: npm install -g @pnp/cli-microsoft365
+
+      - name: Login to Microsoft 365
+        run: |
+          m365 login --authType password \
+            --userName "${{ secrets.ADMIN_USERNAME }}" \
+            --password "${{ secrets.ADMIN_PASSWORD }}"
+        env:
+          ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+
+      - name: Deploy SPFx app to catalog
+        run: |
+          m365 spo app add \
+            --filePath "./sharepoint/solution/your-solution-name.sppkg" \
+            --appCatalogUrl "${{ secrets.APP_CATALOG_URL }}" \
+            --overwrite
+          m365 spo app deploy \
+            --name "your-solution-name.sppkg" \
+            --appCatalogUrl "${{ secrets.APP_CATALOG_URL }}"
+        env:
+          APP_CATALOG_URL: ${{ secrets.APP_CATALOG_URL }}
+
+      - name: Logout from Microsoft 365
+        if: always()
+        run: m365 logout
