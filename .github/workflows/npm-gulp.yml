@@ -59,7 +59,7 @@ jobs:
       - name: Deploy SPFx app to catalog
         run: |
           m365 spo app add \
-            --filePath "./sharepoint/solution/your-solution-name.sppkg" \
+            --filePath "./sharepoint/solution/new-solution.sppkg" \
             --appCatalogUrl "${{ secrets.APP_CATALOG_URL }}" \
             --overwrite
           m365 spo app deploy \
