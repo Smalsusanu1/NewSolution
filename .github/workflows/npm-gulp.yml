@@ -52,7 +52,6 @@ jobs:
             --userName "${{ secrets.ADMIN_USERNAME }}" \
             --password "${{ secrets.ADMIN_PASSWORD }}"
         env:
-          APP_ID: ${{ secrets.APP_ID }}
           ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
 
