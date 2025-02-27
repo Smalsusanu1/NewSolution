@@ -63,7 +63,7 @@ jobs:
             --appCatalogUrl "${{ secrets.APP_CATALOG_URL }}" \
             --overwrite
           m365 spo app deploy \
-            --name "your-solution-name.sppkg" \
+            --name "new-solution.sppkg" \
             --appCatalogUrl "${{ secrets.APP_CATALOG_URL }}"
         env:
           APP_CATALOG_URL: ${{ secrets.APP_CATALOG_URL }}
